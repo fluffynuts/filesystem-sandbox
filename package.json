@@ -1,0 +1,54 @@
+{
+  "name": "filesystem-sandbox",
+  "version": "1.0.0",
+  "description": "JavaScript module to provide filesystem sandboxes for testing",
+  "main": "dist/src/index.js",
+  "files": [],
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "postbuild": "rimraf dist/tests",
+    "lint": "tslint **/*.ts",
+    "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"zarro increment-package-json-version\"",
+    "prerelease-beta": "run-s build test increment-package-version-beta",
+    "release-beta": "npm publish --tag beta",
+    "prerelease": "run-s build test",
+    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"zarro release\"",
+    "zarro": "zarro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/fluffynuts/filesystem-sandbox.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fluffynuts/filesystem-sandbox/issues"
+  },
+  "homepage": "https://github.com/fluffynuts/filesystem-sandbox#readme",
+  "devDependencies": {
+    "@types/jest": "^25.2.3",
+    "@types/lodash": "^4.14.153",
+    "@types/mkdirp": "^1.0.0",
+    "@types/node": "^14.0.5",
+    "@types/rimraf": "^3.0.0",
+    "@types/uuid": "^8.0.0",
+    "eslint": "^7.1.0",
+    "expect-more-jest": "^5.1.0",
+    "jest": "^26.0.1",
+    "lodash": "^4.17.15",
+    "simple-git": "^2.5.0",
+    "ts-jest": "^26.0.0",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.3",
+    "zarro": "^1.40.0"
+  },
+  "dependencies": {
+    "mkdirp": "^1.0.4",
+    "rimraf": "^3.0.2",
+    "uuid": "^8.1.0"
+  }
+}
