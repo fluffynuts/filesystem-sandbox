@@ -79,6 +79,21 @@ export class Sandbox {
         return fullPath;
     }
 
+    async mkdir(name: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const fullpath = path.join(this._path, name);
+            if (await isFolder(fullpath)) {
+                return fullpath;
+            }
+            try {
+                mkdir(fullpath);
+                resolve(fullpath);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     async readTextFile(at: string): Promise<string> {
         return readFile(
             this.fullPathFor(at),

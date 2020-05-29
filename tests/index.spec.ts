@@ -93,6 +93,22 @@ describe(`filesystem-sandbox`, () => {
             });
         });
 
+        describe(`folders`, () => {
+            it(`should be able to create a folder`, async () => {
+                // Arrange
+                const
+                    name = faker.random.alphaNumeric(10),
+                    sut = create();
+                // Act
+                const folder = await sut.mkdir(name);
+                // Assert
+                expect(folder)
+                    .toBeFolder();
+                expect(path.basename(folder))
+                    .toEqual(name);
+            });
+        });
+
         describe(`file io`, () => {
             it(`should be able to write a text file`, async () => {
                 // Arrange
