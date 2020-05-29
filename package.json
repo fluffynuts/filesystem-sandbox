@@ -1,6 +1,6 @@
 {
   "name": "filesystem-sandbox",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "JavaScript module to provide filesystem sandboxes for testing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,9 +14,9 @@
     "lint": "tslint **/*.ts",
     "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"zarro increment-package-json-version\"",
     "prerelease-beta": "run-s build test",
-    "release-beta": "cross-env BETA=1 VERSION_INCREMENT_STRATEGY=patch run-s \"zarro release\"",
+    "release-beta": "cross-env BETA=1 VERSION_INCREMENT_STRATEGY=patch run-s \"zarro release-npm\"",
     "prerelease": "run-s build test",
-    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"zarro release\"",
+    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"zarro release-npm\"",
     "zarro": "zarro"
   },
   "repository": {
@@ -47,7 +47,7 @@
     "ts-jest": "^26.0.0",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3",
-    "zarro": "^1.48.6"
+    "zarro": "^1.48.7"
   },
   "dependencies": {
     "mkdirp": "^1.0.4",
