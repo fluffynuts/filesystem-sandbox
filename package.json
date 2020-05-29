@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "JavaScript module to provide filesystem sandboxes for testing",
   "main": "dist/src/index.js",
-  "files": [],
+  "files": [
+    "dist/**/*"
+  ],
   "types": "dist/src/index.d.ts",
   "scripts": {
     "test": "jest",
     "prebuild": "rimraf dist",
     "build": "tsc",
-    "postbuild": "rimraf dist/tests",
     "lint": "tslint **/*.ts",
     "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"zarro increment-package-json-version\"",
     "prerelease-beta": "run-s build test increment-package-version-beta",

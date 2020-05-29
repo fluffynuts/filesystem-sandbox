@@ -1,11 +1,11 @@
-import { BaseEncodingOptions, promises as fs, Stats, StatsBase } from "fs";
+import { BaseEncodingOptions, promises as fs } from "fs";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
 }
-
+// require for "path" produces the cleanest js output
+const path = require("path");
 import { v4 as uuid } from "uuid";
-import * as path from "path";
 import { sync as mkdir } from "mkdirp";
 import { sync as _rimraf } from "rimraf";
 
