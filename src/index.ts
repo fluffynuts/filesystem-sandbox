@@ -94,11 +94,24 @@ export class Sandbox {
         return path.join(this._path, relativePath);
     }
 
+    /**
+     * Destroys all sandboxes created in this process up until now
+     */
     public static async destroyAll() {
         const toDestroy = sandboxes.splice(0, sandboxes.length);
         for (let sandbox of toDestroy) {
             await sandbox.destroy();
         }
+    }
+
+    /**
+     * Destroys the default base folder for sandboxes -- useful as a once-off
+     * run before all tests to ensure that there are no lingering sandboxes
+     * - cannot destroy sandboxes in custom paths
+     */
+    public static async destroyAny() {
+        const target = path.join(process.cwd(), basePrefix);
+        await rimraf(target);
     }
 
     public static async create(at: string) {
