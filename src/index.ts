@@ -20,6 +20,14 @@ async function isFolder(p: string): Promise<boolean> {
     }
 }
 
+async function readdir(p: string) {
+    const exists = await isFolder(p);
+    if (!exists) {
+        return[];
+    }
+    return await fs.readdir(p);
+}
+
 async function rimraf(p: string): Promise<void> {
     if (!(await isFolder(p))) {
         return;
@@ -41,12 +49,14 @@ const sandboxes: Sandbox[] = [];
 export class Sandbox {
     private readonly _path: string;
     private readonly _base: string;
+    private readonly _at: string | undefined;
 
     get path() {
         return this._path;
     }
 
     constructor(at?: string) {
+        this._at = at;
         this._base = path.join(at || process.cwd(), basePrefix);
         this._path = path.join(this._base, uuid());
         mkdir(this._path);
@@ -54,15 +64,35 @@ export class Sandbox {
     }
 
     public async destroy() {
+        await this.tryDestroySelf();
+        await this.tryDestroyContainer();
+        await this.tryDestroyAt();
+    }
+
+    private async tryDestroyAt() {
+        if (!this._at) {
+            return;
+        }
+        await this.destroyFolderIfEmpty(this._at);
+    }
+
+    private async tryDestroyContainer() {
+        await this.destroyFolderIfEmpty(this._base);
+    }
+
+    private async destroyFolderIfEmpty(p: string) {
+        const contents = await readdir(p);
+        if (!contents.length) {
+            await rimraf(p);
+        }
+    }
+
+    private async tryDestroySelf() {
         const myIndex = sandboxes.indexOf(this);
         if (myIndex > -1) {
             sandboxes.splice(myIndex, 1);
         }
         await rimraf(this._path);
-        const contents = await fs.readdir(this._base);
-        if (!contents.length) {
-            await rimraf(this._base);
-        }
     }
 
     async writeFile(at: string, contents: string | Buffer) {

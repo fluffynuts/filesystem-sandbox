@@ -1,4 +1,4 @@
-import "./test-helpers";
+import "expect-even-more-jest";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { basePrefix, Sandbox } from "../src";
@@ -185,7 +185,7 @@ describe(`filesystem-sandbox`, () => {
                     result = new Array(length);
 
                 for (let i = 0; i < length; i++) {
-                    result[i] = faker.random.number({ min: 0, max: 255});
+                    result[i] = faker.random.number({ min: 0, max: 255 });
                 }
                 return result;
             }
@@ -194,13 +194,23 @@ describe(`filesystem-sandbox`, () => {
 
     beforeAll(() => {
         // in case there's something hanging about from a prior test run
-        rimraf.sync(basePrefix);
+        try {
+            rimraf.sync(basePrefix);
+        } catch (e) {
+        }
     });
+
+    let sandboxes: Sandbox[] = [];
     afterEach(async () => {
-        await Sandbox.destroyAll();
+        const toDestroy = sandboxes.splice(0, sandboxes.length);
+        for (let sandbox of toDestroy) {
+            await sandbox.destroy();
+        }
     });
 
     function create(at?: string) {
-        return new Sandbox(at)
+        const result = new Sandbox(at)
+        sandboxes.push(result);
+        return result;
     }
 });
