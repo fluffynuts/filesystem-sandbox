@@ -6,13 +6,13 @@ const
   gitPushTags = requireModule("git-push-tags"),
   gitPush = requireModule("git-push"),
   env = requireModule("env"),
-  readPackageVersion = requireModule("read-package-version");
+  readPackageVersion = requireModule("read-package-version"),
+  alterPackageJsonVersion = requireModule("alter-package-json-version");
 
 gulp.task("release", ["increment-package-json-version"], async () => {
   const
     dryRun = env.resolveFlag("DRY_RUN"),
-    rootGit = new Git(),
-    gulpTasksGit = new Git("gulp-tasks");
+    rootGit = new Git();
 
   const
     version = await readPackageVersion(),
@@ -20,14 +20,16 @@ gulp.task("release", ["increment-package-json-version"], async () => {
   if (dryRun) {
     return;
   }
+  try {
+    await spawn("npm", ["publish"]);
+  } catch (e) {
+    // roll back version & rethrow
+    await alterPackageJsonVersion({ loadUnsetFromEnvironment: true, incrementBy: -1 });
+    throw e;
+  }
+
   await rootGit.add(":/");
   await rootGit.commit(":bookmark: bump package version");
-  await gitTag(tag);
-
-  await gulpTasksGit.add(":/");
-  await gulpTasksGit.commit(`:bookmark: goes with zarro v${ version }`)
-  await gitTag(tag, undefined, "gulp-tasks");
-  await spawn("npm", ["publish"]);
   await gitPush(dryRun);
   await gitPushTags(dryRun);
 });
