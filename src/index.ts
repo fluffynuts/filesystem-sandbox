@@ -159,7 +159,7 @@ export class Sandbox {
         await rimraf(target);
     }
 
-    public static async create(at: string) {
+    public static async create(at?: string) {
         return new Sandbox(at);
     }
 }
