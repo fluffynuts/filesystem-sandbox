@@ -10,13 +10,16 @@
   "scripts": {
     "test": "jest",
     "prebuild": "rimraf dist",
-    "build": "tsc",
-    "lint": "tslint **/*.ts",
+    "build": "run-p tsc lint",
+    "autobuild": "nodemon -V -w src -w tests -e ts -x \"run-s -s build autobuild-message\"",
+    "autobuild-message": "node -e \"console.log('Auto-build completed', new Date());\"",
+    "lint": "tslint -p .",
     "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"zarro increment-package-json-version\"",
     "prerelease-beta": "run-s build test",
     "release-beta": "cross-env BETA=1 VERSION_INCREMENT_STRATEGY=patch run-s \"zarro release-npm\"",
     "prerelease": "run-s build test",
     "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"zarro release-npm\"",
+    "tsc": "tsc",
     "zarro": "zarro"
   },
   "repository": {
@@ -44,6 +47,7 @@
     "faker": "^4.1.0",
     "jest": "^26.0.1",
     "lodash": "^4.17.15",
+    "nodemon": "^2.0.4",
     "simple-git": "^2.5.0",
     "ts-jest": "^26.0.0",
     "tslint": "^6.1.2",

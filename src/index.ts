@@ -1,10 +1,10 @@
-import { BaseEncodingOptions, promises as fs } from "fs";
+import { BaseEncodingOptions, promises as fs, StatsBase } from "fs";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
 }
 // require for "path" produces the cleanest js output
-const path = require("path");
+import path from "path";
 import { v4 as uuid } from "uuid";
 import { sync as mkdir } from "mkdirp";
 import { sync as _rimraf } from "rimraf";
@@ -23,7 +23,7 @@ async function isFolder(p: string): Promise<boolean> {
 async function readdir(p: string) {
     const exists = await isFolder(p);
     if (!exists) {
-        return[];
+        return [];
     }
     return await fs.readdir(p);
 }
@@ -51,7 +51,7 @@ export class Sandbox {
     private readonly _base: string;
     private readonly _at: string | undefined;
 
-    get path() {
+    public get path() {
         return this._path;
     }
 
@@ -95,7 +95,7 @@ export class Sandbox {
         await rimraf(this._path);
     }
 
-    async writeFile(at: string, contents: string | Buffer) {
+    public async writeFile(at: string, contents: string | Buffer) {
         const
             fullPath = this.fullPathFor(at),
             options = contents instanceof Buffer
@@ -109,7 +109,7 @@ export class Sandbox {
         return fullPath;
     }
 
-    async mkdir(name: string): Promise<string> {
+    public async mkdir(name: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const fullpath = path.join(this._path, name);
             if (await isFolder(fullpath)) {
@@ -124,19 +124,50 @@ export class Sandbox {
         });
     }
 
-    async readTextFile(at: string): Promise<string> {
+    public async readTextFile(at: string): Promise<string> {
         return readFile(
             this.fullPathFor(at),
             { encoding: "utf8" }
         );
     }
 
-    async readFile(at: string): Promise<Buffer> {
+    public async readFile(at: string): Promise<Buffer> {
         return readFile(this.fullPathFor(at));
     }
 
-    fullPathFor(relativePath: string) {
+    public fullPathFor(relativePath: string) {
         return path.join(this._path, relativePath);
+    }
+
+    public async stat(relativePath: string): Promise<StatsBase<any> | null> {
+        try {
+            return await fs.stat(
+                this.fullPathFor(relativePath)
+            );
+        } catch (e) {
+            return null;
+        }
+    }
+
+    public async folderExists(relativePath: string): Promise<boolean> {
+        return this.runOnStat(
+            relativePath,
+            st => !!st && st.isDirectory()
+        );
+    }
+
+    public async fileExists(relativePath: string): Promise<boolean> {
+        return this.runOnStat(
+            relativePath,
+            st => !!st && st.isFile()
+        );
+    }
+
+    private async runOnStat<T>(relativePath: string, fn: ((st: StatsBase<any> | null) => T)): Promise<T> {
+        const st = await this.stat(
+            relativePath
+        );
+        return fn(st);
     }
 
     /**
@@ -144,7 +175,7 @@ export class Sandbox {
      */
     public static async destroyAll() {
         const toDestroy = sandboxes.splice(0, sandboxes.length);
-        for (let sandbox of toDestroy) {
+        for (const sandbox of toDestroy) {
             await sandbox.destroy();
         }
     }
