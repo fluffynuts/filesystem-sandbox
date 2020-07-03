@@ -4,14 +4,15 @@ import * as path from "path";
 import { basePrefix, Sandbox } from "../src";
 import * as faker from "faker";
 import rimraf from "rimraf";
+import * as os from "os";
 
 describe(`filesystem-sandbox`, () => {
     describe(`construction`, () => {
         describe(`when given no at`, () => {
-            it(`should create a sandbox dir under the current working folder`, async () => {
+            it(`should create a sandbox dir under the system tempdir`, async () => {
                 // Arrange
                 const
-                    expectedBase = path.join(process.cwd(), basePrefix);
+                    expectedBase = path.join(os.tmpdir(), basePrefix);
                 expect(expectedBase)
                     .not.toBeFolder();
                 // Act

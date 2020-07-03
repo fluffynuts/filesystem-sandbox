@@ -1,4 +1,5 @@
 import { BaseEncodingOptions, promises as fs, StatsBase } from "fs";
+import * as os from "os";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
@@ -43,6 +44,7 @@ async function rimraf(p: string): Promise<void> {
 }
 
 export const basePrefix = "__sandboxes__";
+let baseTarget = os.tmpdir();
 
 const sandboxes: Sandbox[] = [];
 
@@ -57,7 +59,7 @@ export class Sandbox {
 
     constructor(at?: string) {
         this._at = at;
-        this._base = path.join(at || process.cwd(), basePrefix);
+        this._base = path.join(at || baseTarget, basePrefix);
         this._path = path.join(this._base, uuid());
         mkdir(this._path);
         sandboxes.push(this);
@@ -192,6 +194,21 @@ export class Sandbox {
 
     public static async create(at?: string) {
         return new Sandbox(at);
+    }
+
+    public static async setBaseTargetToCurrentWorkingDirectory() {
+        await this.setBaseTarget(process.cwd());
+    }
+
+    public static async setBaseTargetToSystemTempFolder() {
+        await this.setBaseTarget(os.tmpdir())
+    }
+
+    public static async setBaseTarget(to: string) {
+        if (!(await isFolder(to))) {
+            await mkdir(to)
+        }
+        baseTarget = to;
     }
 }
 
