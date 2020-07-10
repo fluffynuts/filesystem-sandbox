@@ -10,6 +10,7 @@ describe(`filesystem-sandbox`, () => {
     describe(`construction`, () => {
         describe(`when given no at`, () => {
             it(`should create a sandbox dir under the system tempdir`, async () => {
+                await Sandbox.destroyAny();
                 // Arrange
                 const
                     expectedBase = path.join(os.tmpdir(), basePrefix);
@@ -74,6 +75,7 @@ describe(`filesystem-sandbox`, () => {
     });
 
     describe(`destroyAll`, () => {
+        beforeEach(async () => await Sandbox.destroyAny());
         it(`should destroy all sandboxes`, async () => {
             // Arrange
             const
@@ -126,6 +128,23 @@ describe(`filesystem-sandbox`, () => {
             const writtenData = await fs.readFile(fullpath, { encoding: "utf8" });
             expect(writtenData)
                 .toEqual(data);
+        });
+
+        it(`should be able to write a text file given lines`, async () => {
+            // Arrange
+            const
+                data = [ faker.random.words(50), faker.random.words(50) ],
+                expected = data.join("\n"),
+                filename = faker.random.alphaNumeric(10),
+                sut = create();
+            // Act
+            const fullpath = await sut.writeFile(filename, data);
+            // Assert
+            expect(fullpath)
+                .toBeFile();
+            const writtenData = await fs.readFile(fullpath, { encoding: "utf8" });
+            expect(writtenData)
+                .toEqual(expected);
         });
 
         it(`should be able to read a text file by relative path`, async () => {

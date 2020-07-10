@@ -97,12 +97,15 @@ export class Sandbox {
         await rimraf(this._path);
     }
 
-    public async writeFile(at: string, contents: string | Buffer) {
+    public async writeFile(at: string, contents: string | Buffer | string[]) {
         const
             fullPath = this.fullPathFor(at),
             options = contents instanceof Buffer
                 ? undefined
                 : { encoding: "utf8" } as BaseEncodingOptions;
+        if (Array.isArray(contents)) {
+            contents = contents.join("\n");
+        }
         await writeFile(
             fullPath,
             contents,
@@ -188,7 +191,7 @@ export class Sandbox {
      * - cannot destroy sandboxes in custom paths
      */
     public static async destroyAny() {
-        const target = path.join(process.cwd(), basePrefix);
+        const target = path.join(baseTarget, basePrefix);
         await rimraf(target);
     }
 
