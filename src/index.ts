@@ -12,6 +12,9 @@ import { sync as _rimraf } from "rimraf";
 
 const { writeFile, readFile, stat } = fs;
 
+export type Func<T> = () => T;
+export type AsyncFunc<T> = () => Promise<T>;
+
 async function isFolder(p: string): Promise<boolean> {
     try {
         const st = await stat(p);
@@ -173,6 +176,31 @@ export class Sandbox {
             relativePath
         );
         return fn(st);
+    }
+
+    public async run<T>(
+        fn: Func<T> | AsyncFunc<T>,
+        relativePath?: string
+    ): Promise<T> {
+        const start = process.cwd();
+        try {
+            const target = relativePath
+                ? path.resolve(path.join(this.path, relativePath))
+                : this.path;
+            this._validatePathInsideSandbox(target);
+            process.chdir(target);
+            return await fn();
+        } finally {
+            process.chdir(start);
+        }
+
+    }
+
+    private _validatePathInsideSandbox(t: string) {
+        if (t.startsWith(this.path)) {
+            return;
+        }
+        throw new Error(`${t} is not inside sandbox at ${this.path}`);
     }
 
     /**
