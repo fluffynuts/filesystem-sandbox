@@ -52,7 +52,7 @@
     "ts-jest": "^26.0.0",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3",
-    "zarro": "^1.49.0"
+    "zarro": "^1.68.0"
   },
   "dependencies": {
     "mkdirp": "^1.0.4",
