@@ -203,6 +203,20 @@ describe(`filesystem-sandbox`, () => {
                 .toEqual(updated);
         });
 
+        it(`should create the supporting folders if necessary`, async () => {
+            // Arrange
+            const
+                sut = create(),
+                folder = faker.random.alphaNumeric(10),
+                file = faker.random.alphaNumeric(10),
+                fullPath = sut.fullPathFor(folder, file);
+            // Act
+            await sut.writeFile(path.join(folder, file), faker.random.words());
+            // Assert
+            expect(fullPath)
+                .toBeFile();
+        });
+
         function randomBytes() {
             const
                 length = faker.random.number({ min: 500, max: 1024 }),

@@ -109,6 +109,7 @@ export class Sandbox {
         if (Array.isArray(contents)) {
             contents = contents.join("\n");
         }
+        await this.mkdir(path.dirname(at));
         await writeFile(
             fullPath,
             contents,
@@ -121,7 +122,7 @@ export class Sandbox {
         return new Promise(async (resolve, reject) => {
             const fullpath = path.join(this._path, name);
             if (await isFolder(fullpath)) {
-                return fullpath;
+                resolve(fullpath);
             }
             try {
                 mkdir(fullpath);
