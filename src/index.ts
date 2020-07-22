@@ -143,8 +143,8 @@ export class Sandbox {
         return readFile(this.fullPathFor(at));
     }
 
-    public fullPathFor(relativePath: string) {
-        return path.join(this._path, relativePath);
+    public fullPathFor(relativePath: string, ...parts: string[]) {
+        return path.join(this._path, relativePath, ...parts);
     }
 
     public async stat(relativePath: string): Promise<StatsBase<any> | null> {
