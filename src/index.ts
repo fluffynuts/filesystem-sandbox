@@ -101,6 +101,8 @@ export class Sandbox {
     }
 
     public async writeFile(at: string, contents: string | Buffer | string[]) {
+        const providedAt = at;
+        at = this.resolveRelativePath(at);
         const
             fullPath = this.fullPathFor(at),
             options = contents instanceof Buffer
@@ -110,15 +112,20 @@ export class Sandbox {
             contents = contents.join("\n");
         }
         await this.mkdir(path.dirname(at));
-        await writeFile(
-            fullPath,
-            contents,
-            options
-        );
+        try {
+            await writeFile(
+                fullPath,
+                contents,
+                options
+            );
+        } catch (e) {
+            throw new Error(`Unable to write file at: ${providedAt}: ${e.message || e}`);
+        }
         return fullPath;
     }
 
     public async mkdir(name: string): Promise<string> {
+        name = this.resolveRelativePath(name);
         return new Promise(async (resolve, reject) => {
             const fullpath = path.join(this._path, name);
             if (await isFolder(fullpath)) {
@@ -133,6 +140,17 @@ export class Sandbox {
         });
     }
 
+    private resolveRelativePath(at: string): string {
+        if (!path.isAbsolute(at)) {
+            return at;
+        }
+        const result = path.relative(this._path, at);
+        if (result.startsWith("..")) {
+            throw new Error(`${ at } is outside the sandbox at ${ this._path }`);
+        }
+        return result;
+    }
+
     public async readTextFile(at: string): Promise<string> {
         return readFile(
             this.fullPathFor(at),
@@ -145,29 +163,33 @@ export class Sandbox {
     }
 
     public fullPathFor(relativePath: string, ...parts: string[]) {
+        relativePath = this.resolveRelativePath(relativePath);
         return path.join(this._path, relativePath, ...parts);
     }
 
-    public async stat(relativePath: string): Promise<StatsBase<any> | null> {
+    public async stat(at: string): Promise<StatsBase<any> | null> {
+        at = this.resolveRelativePath(at);
         try {
             return await fs.stat(
-                this.fullPathFor(relativePath)
+                this.fullPathFor(at)
             );
         } catch (e) {
             return null;
         }
     }
 
-    public async folderExists(relativePath: string): Promise<boolean> {
+    public async folderExists(at: string): Promise<boolean> {
+        at = this.resolveRelativePath(at);
         return this.runOnStat(
-            relativePath,
+            at,
             st => !!st && st.isDirectory()
         );
     }
 
-    public async fileExists(relativePath: string): Promise<boolean> {
+    public async fileExists(at: string): Promise<boolean> {
+        at = this.resolveRelativePath(at);
         return this.runOnStat(
-            relativePath,
+            at,
             st => !!st && st.isFile()
         );
     }
@@ -201,7 +223,7 @@ export class Sandbox {
         if (t.startsWith(this.path)) {
             return;
         }
-        throw new Error(`${t} is not inside sandbox at ${this.path}`);
+        throw new Error(`${ t } is not inside sandbox at ${ this.path }`);
     }
 
     /**

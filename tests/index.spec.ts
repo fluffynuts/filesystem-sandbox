@@ -217,6 +217,29 @@ describe(`filesystem-sandbox`, () => {
                 .toBeFile();
         });
 
+        it(`should resolve absolute paths within the sandbox appropriately`, async () => {
+            // Arrange
+            const
+                sandbox = await Sandbox.create(),
+                folder = "folder",
+                file1 = "file1.json",
+                file2 = "file2.js",
+                otherFile = "file2.txt",
+                fullFile1 = sandbox.fullPathFor(folder, file1),
+                fullFile2 = sandbox.fullPathFor(folder, file2);
+            await sandbox.writeFile(fullFile1, faker.random.words());
+            await sandbox.writeFile(fullFile2, faker.random.words());
+            await sandbox.writeFile(otherFile, faker.random.words());
+            // Act
+            // Assert
+            expect(await sandbox.fileExists(fullFile1))
+                .toBeTrue();
+            expect(await sandbox.fileExists(fullFile2))
+                .toBeTrue();
+            expect(await sandbox.fileExists(otherFile))
+                .toBeTrue();
+        });
+
         function randomBytes() {
             const
                 length = faker.random.number({ min: 500, max: 1024 }),
