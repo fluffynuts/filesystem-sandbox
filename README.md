@@ -1,4 +1,10 @@
-# sandbox
+filesystem-sandbox
+---
+
+![Test](https://github.com/fluffynuts/filesystem-sandbox/workflows/Tests/badge.svg)
+
+![npm](https://img.shields.io/npm/v/filesystem-sandbox)
+
 JavaScript module to provide (insecure) filesystem sandboxes for testing
 
 ## Why?
