@@ -1,4 +1,4 @@
-import { BaseEncodingOptions, promises as fs, StatsBase } from "fs";
+import { BaseEncodingOptions, Mode, OpenMode, PathLike, promises as fs, StatsBase } from "fs";
 import * as os from "os";
 
 if (!fs) {
@@ -9,8 +9,9 @@ import path from "path";
 import { v4 as uuid } from "uuid";
 import { sync as mkdir } from "mkdirp";
 import { sync as _rimraf } from "rimraf";
+import { FileHandle } from "fs/promises";
 
-const { writeFile, readFile, stat } = fs;
+const { writeFile, readFile, stat, appendFile } = fs;
 
 export type Func<T> = () => T;
 export type AsyncFunc<T> = () => Promise<T>;
@@ -50,6 +51,28 @@ export const basePrefix = "__sandboxes__";
 let baseTarget = os.tmpdir();
 
 const sandboxes: Sandbox[] = [];
+
+type FileWriter = (path: PathLike | FileHandle, data: string | Uint8Array, options?: BaseEncodingOptions & { mode?: Mode, flag?: OpenMode } | BufferEncoding | null) => Promise<void>;
+
+async function writeData(
+    fullPath: string,
+    contents: string | Buffer | string[],
+    writeFunction: FileWriter
+): Promise<string> {
+    const
+        options = contents instanceof Buffer
+            ? undefined
+            : { encoding: "utf8" } as BaseEncodingOptions;
+    if (Array.isArray(contents)) {
+        contents = contents.join("\n");
+    }
+    await writeFunction(
+        fullPath,
+        contents,
+        options
+    );
+    return fullPath;
+}
 
 export class Sandbox {
     private readonly _path: string;
@@ -101,27 +124,29 @@ export class Sandbox {
     }
 
     public async writeFile(at: string, contents: string | Buffer | string[]) {
-        const providedAt = at;
-        at = this.resolveRelativePath(at);
-        const
-            fullPath = this.fullPathFor(at),
-            options = contents instanceof Buffer
-                ? undefined
-                : { encoding: "utf8" } as BaseEncodingOptions;
-        if (Array.isArray(contents)) {
-            contents = contents.join("\n");
-        }
-        await this.mkdir(path.dirname(at));
         try {
-            await writeFile(
-                fullPath,
+            await this.mkdir(path.dirname(at));
+            return await writeData(
+                this.fullPathFor(at),
                 contents,
-                options
+                writeFile
             );
         } catch (e) {
-            throw new Error(`Unable to write file at: ${providedAt}: ${e.message || e}`);
+            throw new Error(`Unable to write file at ${ at }: ${ e.message || e }`);
         }
-        return fullPath;
+    }
+
+    public async appendFile(at: string, contents: string | Buffer | string[]) {
+        try {
+            await this.mkdir(path.dirname(at));
+            return await writeData(
+                this.fullPathFor(at),
+                contents,
+                appendFile
+            );
+        } catch (e) {
+            throw new Error(`Unable to append to file at ${ at }: ${ e.message || e }`);
+        }
     }
 
     public async mkdir(name: string): Promise<string> {
