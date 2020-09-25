@@ -1,10 +1,8 @@
 import "expect-even-more-jest";
-import { promises as fs } from "fs";
 import * as path from "path";
 import { Sandbox } from "../src";
 import * as faker from "faker";
 import { promises as fsPromises } from "fs";
-import { create } from "./common";
 
 const { readdir, readFile } = fsPromises;
 
