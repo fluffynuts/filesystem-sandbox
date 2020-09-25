@@ -2,14 +2,18 @@
   "name": "filesystem-sandbox",
   "version": "1.19.0",
   "description": "JavaScript module to provide filesystem sandboxes for testing",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
     "test": "jest",
-    "prebuild": "rimraf dist",
+    "prebuild": "run-p clean-dist generate-index",
+    "clean-dist": "rimraf dist",
+    "generate-index": "node generate-index.js",
     "build": "run-p tsc lint",
     "autobuild": "nodemon -V -w src -w tests -e ts -x \"run-s -s build autobuild-message\"",
     "autobuild-message": "node -e \"console.log('Auto-build completed', new Date());\"",
