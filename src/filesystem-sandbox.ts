@@ -131,7 +131,7 @@ export class Sandbox {
                 contents,
                 writeFile
             );
-        } catch (e) {
+        } catch (e: any) {
             throw new Error(`Unable to write file at ${ at }: ${ e.message || e }`);
         }
     }
@@ -144,7 +144,7 @@ export class Sandbox {
                 contents,
                 appendFile
             );
-        } catch (e) {
+        } catch (e: any) {
             throw new Error(`Unable to append to file at ${ at }: ${ e.message || e }`);
         }
     }

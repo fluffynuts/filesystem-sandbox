@@ -1,7 +1,7 @@
 import "expect-even-more-jest";
 import * as path from "path";
 import { Sandbox } from "../src";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 import { promises as fsPromises } from "fs";
 
 const { readdir, readFile } = fsPromises;

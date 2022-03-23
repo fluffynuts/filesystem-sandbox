@@ -2,7 +2,7 @@ import "expect-even-more-jest";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { Sandbox } from "../src";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 import { create } from "./common";
 
 describe(`filesystem-sandbox`, () => {
@@ -211,11 +211,11 @@ describe(`filesystem-sandbox`, () => {
 
         function randomBytes() {
             const
-                length = faker.random.number({ min: 500, max: 1024 }),
+                length = faker.datatype.number({ min: 500, max: 1024 }),
                 result = new Array(length);
 
             for (let i = 0; i < length; i++) {
-                result[i] = faker.random.number({ min: 0, max: 255 });
+                result[i] = faker.datatype.number({ min: 0, max: 255 });
             }
             return result;
         }

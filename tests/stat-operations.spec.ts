@@ -1,5 +1,5 @@
 import "expect-even-more-jest";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 import { create } from "./common";
 
 describe(`filesystem-sandbox`, () => {

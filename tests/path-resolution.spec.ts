@@ -1,5 +1,5 @@
 import { create } from "./common";
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import path from "path";
 
 describe(`fullPathFor`, () => {
