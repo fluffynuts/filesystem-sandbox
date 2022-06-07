@@ -1,15 +1,16 @@
+import { spawn as _spawn, SpawnOptions } from "child_process";
 import { BaseEncodingOptions, Mode, OpenMode, PathLike, promises as fs, StatsBase } from "fs";
 import * as os from "os";
-
-if (!fs) {
-    throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
-}
 // require for "path" produces the cleanest js output
 import path from "path";
 import { v4 as uuid } from "uuid";
 import { sync as mkdir } from "mkdirp";
 import { sync as _rimraf } from "rimraf";
 import { FileHandle } from "fs/promises";
+
+if (!fs) {
+    throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
+}
 
 const { writeFile, readFile, stat, appendFile } = fs;
 
@@ -241,7 +242,39 @@ export class Sandbox {
         } finally {
             process.chdir(start);
         }
+    }
 
+    public async exec(
+        command: string,
+        args?: string[],
+        options?: SpawnOptions
+    ): Promise<ProcessData> {
+        return await this.run(() => {
+            const
+                spawnArgs = args || [] as string[],
+                spawnOptions = options || {} as SpawnOptions;
+            return new Promise<ProcessData>((resolve, reject) => {
+                const
+                    child = _spawn(command, spawnArgs, spawnOptions),
+                    result: ProcessData = {
+                        stdout: [],
+                        stderr: [],
+                        code: -1
+                    };
+                child.stderr?.on("data", d => {
+                    result.stderr.push(d.toString());
+                })
+                child.stdout?.on("data", d => {
+                    result.stdout.push(d.toString());
+                });
+                child.on("close", code => {
+                    result.code = code;
+                    return code
+                        ? reject(makeSpawnErrorFor(result, command, args, options))
+                        : resolve(result);
+                });
+            });
+        });
     }
 
     private _validatePathInsideSandbox(t: string) {
@@ -291,3 +324,31 @@ export class Sandbox {
     }
 }
 
+function makeSpawnErrorFor(
+    result: ProcessData,
+    command: string,
+    args: string[] | undefined,
+    options: SpawnOptions | undefined
+): SpawnError {
+    const e = new Error(`Error exit code ${ result.code } for: ${ command } ${ (args || []).join(" ") }`);
+    return {
+        ...e,
+        result,
+        command,
+        args,
+        options
+    };
+}
+
+export interface ProcessData {
+    stdout: string[];
+    stderr: string[];
+    code: number;
+}
+
+export interface SpawnError extends Error {
+    command: string;
+    args: string[] | undefined;
+    options: SpawnOptions | undefined,
+    result: ProcessData;
+}

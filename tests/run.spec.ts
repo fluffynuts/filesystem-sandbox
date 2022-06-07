@@ -2,9 +2,7 @@ import "expect-even-more-jest";
 import * as path from "path";
 import { Sandbox } from "../src";
 import { faker } from "@faker-js/faker";
-import { promises as fsPromises } from "fs";
-
-const { readdir, readFile } = fsPromises;
+import { ls, readTextFile } from "yafs";
 
 describe(`filesystem-sandbox`, () => {
     describe(`run`, () => {
@@ -13,14 +11,26 @@ describe(`filesystem-sandbox`, () => {
                 // Arrange
                 const
                     sandbox = await Sandbox.create();
-                await sandbox.writeFile("__test__", "some data");
                 // Act
                 const result = await sandbox.run(
-                    () => readdir(".")
+                    () => process.cwd()
                 );
                 // Assert
                 expect(result)
-                    .toEqual(["__test__"]);
+                    .toEqual(sandbox.path);
+            });
+            it(`should run the provided function in the context of the sandbox folder`, async () => {
+                // Arrange
+                const
+                    sandbox = await Sandbox.create();
+                await sandbox.writeFile("__test__", faker.random.words());
+                // Act
+                const result = await sandbox.run(
+                    () => ls(".")
+                );
+                // Assert
+                expect(result)
+                    .toEqual([ "__test__" ]);
             });
         });
         describe(`given relative path`, () => {
@@ -34,7 +44,7 @@ describe(`filesystem-sandbox`, () => {
                 await sandbox.writeFile(path.join(folder, "README.md"), contents);
                 // Act
                 const result = await sandbox.run(
-                    () => readFile("README.md", { encoding: "utf8" }),
+                    () => readTextFile("README.md"),
                     folder
                 );
                 // Assert
@@ -52,10 +62,27 @@ describe(`filesystem-sandbox`, () => {
                 await sandbox.writeFile(path.join(folder, "README.md"), contents);
                 // Act
                 await expect(sandbox.run(
-                    () => readFile("README.md", { encoding: "utf8" }),
+                    () => readTextFile("README.md"),
                     "../otherFolder"
                 )).rejects.toThrow(/not inside sandbox/);
                 // Assert
+            });
+        });
+
+        describe(`exec`, () => {
+            it(`should be like run, but executes the given command`, async () => {
+                // Arrange
+                const
+                    sandbox = await Sandbox.create();
+                // Act
+                const result = await sandbox.exec("pwd");
+                // Assert
+                expect(result)
+                    .toExist();
+                expect(result.stdout[0])
+                    .toExist();
+                expect(result.stdout[0].trim())
+                    .toEqual(sandbox.fullPathFor("."));
             });
         });
     });
