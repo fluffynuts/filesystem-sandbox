@@ -3,10 +3,10 @@ import { BaseEncodingOptions, Mode, OpenMode, PathLike, promises as fs, StatsBas
 import * as os from "os";
 // require for "path" produces the cleanest js output
 import path from "path";
-import { v4 as uuid } from "uuid";
 import { sync as mkdir } from "mkdirp";
 import { sync as _rimraf } from "rimraf";
 import { FileHandle } from "fs/promises";
+import { uuid } from "./uuid";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
