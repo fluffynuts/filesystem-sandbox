@@ -107,7 +107,15 @@ export class Sandbox {
     private async destroyFolderIfEmpty(p: string) {
         const contents = await ls(p);
         if (!contents.length) {
-            await rm(p);
+            try {
+                await rm(p);
+            } catch (e) {
+                // suppress: the method is literally
+                // "destroy folder if empty", and
+                // I sometimes see errors at CI where
+                // this folder isn't empty at the point
+                // of calling rm - likely a clash with another test
+            }
         }
     }
 
