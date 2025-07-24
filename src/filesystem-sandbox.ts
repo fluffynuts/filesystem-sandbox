@@ -5,7 +5,7 @@ import * as os from "os";
 import path from "path";
 import { FileHandle } from "fs/promises";
 import { uuid } from "./uuid";
-import { rmSync, mkdir, rm, mkdirSync, writeTextFile } from "yafs";
+import { ls, mkdir, rm, mkdirSync, writeTextFile } from "yafs";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
@@ -38,7 +38,10 @@ let baseTarget = os.tmpdir();
 
 const sandboxes: Sandbox[] = [];
 
-type FileWriter = (path: PathLike | FileHandle, data: string | Uint8Array, options?: BaseEncodingOptions & { mode?: Mode, flag?: OpenMode } | BufferEncoding | null) => Promise<void>;
+type FileWriter = (path: PathLike | FileHandle, data: string | Uint8Array, options?: BaseEncodingOptions & {
+    mode?: Mode,
+    flag?: OpenMode
+} | BufferEncoding | null) => Promise<void>;
 
 async function writeData(
     fullPath: string,
@@ -78,9 +81,16 @@ export class Sandbox {
     }
 
     public async destroy() {
-        await this.tryDestroySelf();
-        await this.tryDestroyContainer();
-        await this.tryDestroyAt();
+        try {
+            await this.tryDestroySelf();
+            await this.tryDestroyContainer();
+            await this.tryDestroyAt();
+        } catch (e) {
+            console.warn(
+                `sandbox destruction did not complete - if you see this regularly, please raise an issue`,
+                e
+            );
+        }
     }
 
     private async tryDestroyAt() {
@@ -95,7 +105,7 @@ export class Sandbox {
     }
 
     private async destroyFolderIfEmpty(p: string) {
-        const contents = await readdir(p);
+        const contents = await ls(p);
         if (!contents.length) {
             await rm(p);
         }
@@ -121,7 +131,7 @@ export class Sandbox {
             }
             return fullPath;
         } catch (e: any) {
-            throw new Error(`Unable to write file at ${ at }: ${ e.message || e }`);
+            throw new Error(`Unable to write file at ${at}: ${e.message || e}`);
         }
     }
 
@@ -134,7 +144,7 @@ export class Sandbox {
                 appendFile
             );
         } catch (e: any) {
-            throw new Error(`Unable to append to file at ${ at }: ${ e.message || e }`);
+            throw new Error(`Unable to append to file at ${at}: ${e.message || e}`);
         }
     }
 
@@ -150,7 +160,7 @@ export class Sandbox {
         }
         const result = path.relative(this._path, at);
         if (result.startsWith("..")) {
-            throw new Error(`${ at } is outside the sandbox at ${ this._path }`);
+            throw new Error(`${at} is outside the sandbox at ${this._path}`);
         }
         return result;
     }
@@ -259,7 +269,7 @@ export class Sandbox {
         if (t.startsWith(this.path)) {
             return;
         }
-        throw new Error(`${ t } is not inside sandbox at ${ this.path }`);
+        throw new Error(`${t} is not inside sandbox at ${this.path}`);
     }
 
     /**
@@ -308,7 +318,7 @@ function makeSpawnErrorFor(
     args: string[] | undefined,
     options: SpawnOptions | undefined
 ): SpawnError {
-    const e = new Error(`Error exit code ${ result.code } for: ${ command } ${ (args || []).join(" ") }`);
+    const e = new Error(`Error exit code ${result.code} for: ${command} ${(args || []).join(" ")}`);
     return {
         ...e,
         result,
