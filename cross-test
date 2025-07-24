@@ -1,0 +1,20 @@
+#!/bin/bash
+NVS_SH="${HOME}/.nvs/nvs.sh"
+
+if test ! -e "$NVS_SH"; then
+  echo "Can't find nvs.sh at ${NVS_SH}"
+  exit 1
+fi
+
+source $NVS_SH
+
+function run_for_node_version()
+{
+  NODE_VERSION="$1";
+  echo "--- testing with node ${NODE_VERSION} ---"
+  nvs exec $NODE_VERSION npm test
+}
+
+run_for_node_version 14
+run_for_node_version 20
+run_for_node_version 22

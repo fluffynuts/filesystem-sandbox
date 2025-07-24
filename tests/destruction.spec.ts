@@ -2,6 +2,7 @@ import "expect-even-more-jest";
 import * as path from "path";
 import { Sandbox } from "../src";
 import { create } from "./common";
+import { folderExists, rm, mkdir } from "yafs";
 import * as os from "os";
 
 describe(`filesystem-sandbox`, () => {
@@ -9,6 +10,12 @@ describe(`filesystem-sandbox`, () => {
     // destruction could be interfered-with; so we'll make this
     // work in its own little area
     const base = path.join(os.tmpdir(), "filesystem-sandbox-destruction-tests");
+    beforeAll(async () => {
+        if (await folderExists(base)) {
+            await rm(base);
+        }
+        await mkdir(base);
+    });
     describe(`destroy`, () => {
         it(`should destroy the sandbox entirely`, async () => {
             // Arrange

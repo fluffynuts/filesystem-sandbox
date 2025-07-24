@@ -1,7 +1,7 @@
-import rimraf from "rimraf";
+import { rmSync } from "yafs";
 import { basePrefix } from "../src";
 
 try {
-    rimraf.sync(basePrefix);
+    rmSync(basePrefix);
 } catch (e) {
 }

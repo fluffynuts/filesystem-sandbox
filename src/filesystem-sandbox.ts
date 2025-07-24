@@ -3,10 +3,9 @@ import { BaseEncodingOptions, Mode, OpenMode, PathLike, promises as fs, StatsBas
 import * as os from "os";
 // require for "path" produces the cleanest js output
 import path from "path";
-import { sync as mkdir } from "mkdirp";
-import { sync as _rimraf } from "rimraf";
 import { FileHandle } from "fs/promises";
 import { uuid } from "./uuid";
+import { rmSync, mkdir, rm, mkdirSync, writeTextFile } from "yafs";
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
@@ -32,20 +31,6 @@ async function readdir(p: string) {
         return [];
     }
     return await fs.readdir(p);
-}
-
-async function rimraf(p: string): Promise<void> {
-    if (!(await isFolder(p))) {
-        return;
-    }
-    return new Promise((resolve, reject) => {
-        try {
-            _rimraf(p, { maxBusyTries: 5 });
-            resolve();
-        } catch (e) {
-            reject(e);
-        }
-    });
 }
 
 export const basePrefix = "__sandboxes__";
@@ -88,7 +73,7 @@ export class Sandbox {
         this._at = at;
         this._base = path.join(at || baseTarget, basePrefix);
         this._path = path.join(this._base, uuid());
-        mkdir(this._path);
+        mkdirSync(this._path);
         sandboxes.push(this);
     }
 
@@ -112,7 +97,7 @@ export class Sandbox {
     private async destroyFolderIfEmpty(p: string) {
         const contents = await readdir(p);
         if (!contents.length) {
-            await rimraf(p);
+            await rm(p);
         }
     }
 
@@ -121,17 +106,20 @@ export class Sandbox {
         if (myIndex > -1) {
             sandboxes.splice(myIndex, 1);
         }
-        await rimraf(this._path);
+        await rm(this._path);
     }
 
-    public async writeFile(at: string, contents: string | Buffer | string[]) {
+    public async writeFile(at: string, contents: string | Buffer | string[]): Promise<string> {
         try {
-            await this.mkdir(path.dirname(at));
-            return await writeData(
-                this.fullPathFor(at),
-                contents,
-                writeFile
-            );
+            const fullPath = this.fullPathFor(at);
+            await mkdir(path.dirname(fullPath));
+            contents = contents || "";
+            if (typeof contents === "string") {
+                await writeFile(fullPath, contents);
+            } else {
+                await writeTextFile(fullPath, contents as string[] | string);
+            }
+            return fullPath;
         } catch (e: any) {
             throw new Error(`Unable to write file at ${ at }: ${ e.message || e }`);
         }
@@ -151,19 +139,9 @@ export class Sandbox {
     }
 
     public async mkdir(name: string): Promise<string> {
-        name = this.resolveRelativePath(name);
-        return new Promise(async (resolve, reject) => {
-            const fullpath = path.join(this._path, name);
-            if (await isFolder(fullpath)) {
-                resolve(fullpath);
-            }
-            try {
-                mkdir(fullpath);
-                resolve(fullpath);
-            } catch (e) {
-                reject(e);
-            }
-        });
+        const fullPath = path.join(this._path, name);
+        await mkdir(fullPath);
+        return fullPath;
     }
 
     private resolveRelativePath(at: string): string {
@@ -301,7 +279,7 @@ export class Sandbox {
      */
     public static async destroyAny() {
         const target = path.join(baseTarget, basePrefix);
-        await rimraf(target);
+        await rm(target);
     }
 
     public static async create(at?: string) {

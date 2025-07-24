@@ -4,6 +4,7 @@ import * as path from "path";
 import { Sandbox } from "../src";
 import { faker } from "@faker-js/faker";
 import { create } from "./common";
+import { readTextFile, writeTextFile } from "yafs";
 
 describe(`filesystem-sandbox`, () => {
     describe(`folders`, () => {
@@ -34,7 +35,7 @@ describe(`filesystem-sandbox`, () => {
             // Assert
             expect(fullpath)
                 .toBeFile();
-            const writtenData = await fs.readFile(fullpath, { encoding: "utf8" });
+            const writtenData = await readTextFile(fullpath);
             expect(writtenData)
                 .toEqual(data);
         });
@@ -51,7 +52,7 @@ describe(`filesystem-sandbox`, () => {
             // Assert
             expect(fullpath)
                 .toBeFile();
-            const writtenData = await fs.readFile(fullpath, { encoding: "utf8" });
+            const writtenData = await readTextFile(fullpath);
             expect(writtenData)
                 .toEqual(expected);
         });
@@ -65,9 +66,9 @@ describe(`filesystem-sandbox`, () => {
             // Act
             const
                 fullpath = await sut.writeFile(filename, data),
-                written = await fs.readFile(fullpath, { encoding: "utf8" }),
+                written = await readTextFile(fullpath),
                 updated = written + faker.random.words(10);
-            await fs.writeFile(fullpath, updated, { encoding: "utf8" });
+            await writeTextFile(fullpath, updated);
             const result = await sut.readTextFile(filename);
             // Assert
             expect(result)
