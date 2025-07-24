@@ -286,7 +286,11 @@ export class Sandbox {
     public static async destroyAll() {
         const toDestroy = sandboxes.splice(0, sandboxes.length);
         for (const sandbox of toDestroy) {
-            await sandbox.destroy();
+            try {
+                await sandbox.destroy();
+            } catch (e) {
+                // suppress
+            }
         }
     }
 
