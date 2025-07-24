@@ -1,6 +1,6 @@
 {
   "name": "filesystem-sandbox",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "JavaScript module to provide filesystem sandboxes for testing",
   "main": "index.js",
   "types": "index.d.ts",
