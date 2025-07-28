@@ -6,6 +6,8 @@ import path from "path";
 import { FileHandle } from "fs/promises";
 import { uuid } from "./uuid";
 import { ls, mkdir, rm, mkdirSync, writeTextFile } from "yafs";
+import { debug as debugFactory } from "debug";
+const debug = debugFactory("yafs");
 
 if (!fs) {
     throw new Error("Yer node is olde! filesystem-sandboxes requires a Node with fs.promises");
@@ -301,7 +303,15 @@ export class Sandbox {
      */
     public static async destroyAny() {
         const target = path.join(baseTarget, basePrefix);
-        await rm(target);
+        try {
+            await rm(target);
+        } catch (e: any) {
+            if (e && e.code === "ENOEMPTY") {
+                debug(`Unable to remove all of ${target} - something is busy in there`)
+                return;
+            }
+            throw e;
+        }
     }
 
     public static async create(at?: string) {

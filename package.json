@@ -39,6 +39,7 @@
   "homepage": "https://github.com/fluffynuts/filesystem-sandbox#readme",
   "devDependencies": {
     "@faker-js/faker": "^6.0.0",
+    "@types/debug": "^4.1.12",
     "@types/jest": "^25.2.3",
     "@types/lodash": "^4.14.153",
     "@types/mkdirp": "^1.0.0",
@@ -56,6 +57,7 @@
     "zarro": "^1.199.0"
   },
   "dependencies": {
+    "debug": "^4.4.1",
     "mkdirp": "^1.0.4",
     "pure-uuid": "^1.6.2",
     "rimraf": "^3.0.2"
