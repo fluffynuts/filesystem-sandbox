@@ -52,7 +52,7 @@
     "ts-jest": "^28.0.4",
     "tslint": "^6.1.2",
     "typescript": "^4.6.2",
-    "yafs": "^1.40.0",
+    "yafs": "^1.42.0",
     "zarro": "^1.199.0"
   },
   "dependencies": {
