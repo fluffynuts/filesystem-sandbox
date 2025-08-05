@@ -23,7 +23,7 @@ describe(`filesystem-sandbox`, () => {
                 // Arrange
                 const
                     sandbox = await Sandbox.create();
-                await sandbox.writeFile("__test__", faker.random.words());
+                await sandbox.writeFile("__test__", faker.word.words());
                 // Act
                 const result = await sandbox.run(
                     () => ls(".")
@@ -38,8 +38,8 @@ describe(`filesystem-sandbox`, () => {
                 // Arrange
                 const
                     sandbox = await Sandbox.create(),
-                    folder = faker.random.alphaNumeric(10),
-                    contents = faker.random.alphaNumeric(10);
+                    folder = faker.string.alphanumeric(10),
+                    contents = faker.string.alphanumeric(10);
                 await sandbox.mkdir(folder);
                 await sandbox.writeFile(path.join(folder, "README.md"), contents);
                 // Act
@@ -56,8 +56,8 @@ describe(`filesystem-sandbox`, () => {
                 // Arrange
                 const
                     sandbox = await Sandbox.create(),
-                    folder = faker.random.alphaNumeric(10),
-                    contents = faker.random.alphaNumeric(10);
+                    folder = faker.string.alphanumeric(10),
+                    contents = faker.string.alphanumeric(10);
                 await sandbox.mkdir(folder);
                 await sandbox.writeFile(path.join(folder, "README.md"), contents);
                 // Act

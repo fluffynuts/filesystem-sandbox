@@ -5,7 +5,7 @@ import * as os from "os";
 import path from "path";
 import { FileHandle } from "fs/promises";
 import { uuid } from "./uuid";
-import { ls, mkdir, rm, mkdirSync, writeTextFile } from "yafs";
+import { ls, mkdir, rm, mkdirSync, writeTextFile, touch } from "yafs";
 import { debug as debugFactory } from "debug";
 const debug = debugFactory("yafs");
 
@@ -273,6 +273,10 @@ export class Sandbox {
                 });
             });
         });
+    }
+
+    public async touch(filePath: string): Promise<void> {
+        await touch(this.fullPathFor(filePath));
     }
 
     private _validatePathInsideSandbox(t: string) {

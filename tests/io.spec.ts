@@ -1,17 +1,17 @@
-import "expect-even-more-jest";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { Sandbox } from "../src";
-import { faker } from "@faker-js/faker";
+import { fakerEN as faker } from "@faker-js/faker";
 import { create } from "./common";
-import { readTextFile, writeTextFile } from "yafs";
+import { readTextFile, writeTextFile, stat } from "yafs";
+import { sleep } from "expect-even-more-jest";
 
 describe(`filesystem-sandbox`, () => {
     describe(`folders`, () => {
         it(`should be able to create a folder`, async () => {
             // Arrange
             const
-                name = faker.random.alphaNumeric(10),
+                name = faker.string.alphanumeric(10),
                 sut = create();
             // Act
             const folder = await sut.mkdir(name);
@@ -27,8 +27,8 @@ describe(`filesystem-sandbox`, () => {
         it(`should be able to write a text file`, async () => {
             // Arrange
             const
-                data = faker.random.words(50),
-                filename = faker.random.alphaNumeric(10),
+                data = faker.word.words(50),
+                filename = faker.string.alphanumeric(10),
                 sut = create();
             // Act
             const fullpath = await sut.writeFile(filename, data);
@@ -43,9 +43,9 @@ describe(`filesystem-sandbox`, () => {
         it(`should be able to write a text file given lines`, async () => {
             // Arrange
             const
-                data = [faker.random.words(50), faker.random.words(50)],
+                data = [faker.word.words(50), faker.word.words(50)],
                 expected = data.join("\n"),
-                filename = faker.random.alphaNumeric(10),
+                filename = faker.string.alphanumeric(10),
                 sut = create();
             // Act
             const fullpath = await sut.writeFile(filename, data);
@@ -60,14 +60,14 @@ describe(`filesystem-sandbox`, () => {
         it(`should be able to read a text file by relative path`, async () => {
             // Arrange
             const
-                data = faker.random.words(50),
-                filename = faker.random.alphaNumeric(10),
+                data = faker.word.words(50),
+                filename = faker.string.alphanumeric(10),
                 sut = create();
             // Act
             const
                 fullpath = await sut.writeFile(filename, data),
                 written = await readTextFile(fullpath),
-                updated = written + faker.random.words(10);
+                updated = written + faker.word.words(10);
             await writeTextFile(fullpath, updated);
             const result = await sut.readTextFile(filename);
             // Assert
@@ -79,7 +79,7 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 data = randomBytes(),
-                filename = faker.random.alphaNumeric(10),
+                filename = faker.string.alphanumeric(10),
                 buffer = Buffer.from(data),
                 sut = create();
             // Act
@@ -94,7 +94,7 @@ describe(`filesystem-sandbox`, () => {
         it(`should be able to read a binary file`, async () => {
             // Arrange
             const
-                filename = faker.random.alphaNumeric(10),
+                filename = faker.string.alphanumeric(10),
                 buffer = Buffer.from(randomBytes()),
                 newData = Buffer.from(randomBytes()),
                 sut = create();
@@ -114,11 +114,11 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sut = create(),
-                folder = faker.random.alphaNumeric(10),
-                file = faker.random.alphaNumeric(10),
+                folder = faker.string.alphanumeric(10),
+                file = faker.string.alphanumeric(10),
                 fullPath = sut.fullPathFor(folder, file);
             // Act
-            await sut.writeFile(path.join(folder, file), faker.random.words());
+            await sut.writeFile(path.join(folder, file), faker.word.words());
             // Assert
             expect(fullPath)
                 .toBeFile();
@@ -134,9 +134,9 @@ describe(`filesystem-sandbox`, () => {
                 otherFile = "file2.txt",
                 fullFile1 = sandbox.fullPathFor(folder, file1),
                 fullFile2 = sandbox.fullPathFor(folder, file2);
-            await sandbox.writeFile(fullFile1, faker.random.words());
-            await sandbox.writeFile(fullFile2, faker.random.words());
-            await sandbox.writeFile(otherFile, faker.random.words());
+            await sandbox.writeFile(fullFile1, faker.word.words());
+            await sandbox.writeFile(fullFile2, faker.word.words());
+            await sandbox.writeFile(otherFile, faker.word.words());
             // Act
             // Assert
             expect(await sandbox.fileExists(fullFile1))
@@ -151,7 +151,7 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sandbox = await Sandbox.create(),
-                fileName = faker.random.alphaNumeric(10),
+                fileName = faker.string.alphanumeric(10),
                 initialData = Buffer.from("hello, "),
                 moreData = Buffer.from("world!");
             // Act
@@ -167,9 +167,9 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sandbox = await Sandbox.create(),
-                fileName = faker.random.alphaNumeric(10),
-                initialData = faker.random.words(),
-                moreData = faker.random.words();
+                fileName = faker.string.alphanumeric(10),
+                initialData = faker.word.words(),
+                moreData = faker.word.words();
             // Act
             await sandbox.writeFile(fileName, initialData);
             await sandbox.appendFile(fileName, moreData);
@@ -183,8 +183,8 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sandbox = await Sandbox.create(),
-                fileName = faker.random.alphaNumeric(10),
-                data = faker.random.words();
+                fileName = faker.string.alphanumeric(10),
+                data = faker.word.words();
             // Act
             await sandbox.appendFile(fileName, data);
             const result = await sandbox.readTextFile(fileName);
@@ -197,11 +197,11 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sandbox = await Sandbox.create(),
-                folder1 = faker.random.alphaNumeric(10),
-                folder2 = faker.random.alphaNumeric(10),
-                fileName = faker.random.alphaNumeric(10),
+                folder1 = faker.string.alphanumeric(10),
+                folder2 = faker.string.alphanumeric(10),
+                fileName = faker.string.alphanumeric(10),
                 relPath = path.join(folder1, folder2, fileName),
-                data = faker.random.words();
+                data = faker.word.words();
             // Act
             await sandbox.appendFile(relPath, data);
             const result = await sandbox.readTextFile(relPath);
@@ -210,13 +210,55 @@ describe(`filesystem-sandbox`, () => {
                 .toEqual(data);
         });
 
+        it(`should be able to touch a file into existence`, async () => {
+            // Arrange
+            const
+                sandbox = await Sandbox.create(),
+                fileName = faker.system.fileName(),
+                fullPath = sandbox.fullPathFor(fileName);
+            expect(fullPath)
+                .not.toBeFile();
+            // Act
+            await sandbox.touch(fileName);
+            // Assert
+            expect(fullPath)
+                .toBeFile();
+            expect(fullPath)
+                .toHaveContents("");
+        });
+
+        it(`should not trash an existing file when touching it`, async () => {
+            // Arrange
+            const
+                sandbox = await Sandbox.create(),
+                expected = faker.word.words(),
+                fileName = faker.system.fileName(),
+                fullPath = await sandbox.writeFile(fileName, expected),
+                st1 = await stat(fullPath);
+            expect(st1)
+                .toExist();
+            // Act
+            await sandbox.touch(fileName);
+            // Assert
+            expect(fullPath)
+                .toHaveContents(expected);
+            const st2 = await stat(fullPath);
+            expect(st2)
+                .toExist();
+            expect(st2!.mtimeMs)
+                .toBeGreaterThan(st1!.mtimeMs);
+            await sleep(1000);
+            expect(st2!.mtimeMs)
+                .toBeLessThan(Date.now());
+        });
+
         function randomBytes() {
             const
-                length = faker.datatype.number({ min: 500, max: 1024 }),
+                length = faker.number.int({ min: 500, max: 1024 }),
                 result = new Array(length);
 
             for (let i = 0; i < length; i++) {
-                result[i] = faker.datatype.number({ min: 0, max: 255 });
+                result[i] = faker.number.int({ min: 0, max: 255 });
             }
             return result;
         }

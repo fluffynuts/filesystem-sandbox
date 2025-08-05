@@ -7,7 +7,7 @@ describe(`fullPathFor`, () => {
         // Arrange
         const
             sut = create(),
-            relative = faker.random.alphaNumeric(10);
+            relative = faker.string.alphanumeric(10);
         // Act
         const result = sut.fullPathFor(relative);
         // Assert
@@ -20,8 +20,8 @@ describe(`fullPathFor`, () => {
         // Arrange
         const
             sut = create(),
-            rel1 = faker.random.alphaNumeric(10),
-            rel2 = faker.random.alphaNumeric(10);
+            rel1 = faker.string.alphanumeric(10),
+            rel2 = faker.string.alphanumeric(10);
         // Act
         const result = sut.fullPathFor(rel1, rel2);
         // Assert

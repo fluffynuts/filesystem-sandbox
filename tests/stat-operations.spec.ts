@@ -8,11 +8,11 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sut = create(),
-                existingFolder = faker.random.alphaNumeric(10),
-                existingFile = faker.random.alphaNumeric(10),
-                doesNotExist = faker.random.alphaNumeric(10);
+                existingFolder = faker.string.alphanumeric(10),
+                existingFile = faker.string.alphanumeric(10),
+                doesNotExist = faker.string.alphanumeric(10);
             await sut.mkdir(existingFolder);
-            await sut.writeFile(existingFile, faker.random.words());
+            await sut.writeFile(existingFile, faker.word.words());
             // Act
             const result1 = await sut.fileExists(existingFolder);
             const result2 = await sut.fileExists(existingFile);
@@ -31,11 +31,11 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sut = create(),
-                existingFolder = faker.random.alphaNumeric(10),
-                existingFile = faker.random.alphaNumeric(10),
-                doesNotExist = faker.random.alphaNumeric(10);
+                existingFolder = faker.string.alphanumeric(10),
+                existingFile = faker.string.alphanumeric(10),
+                doesNotExist = faker.string.alphanumeric(10);
             await sut.mkdir(existingFolder);
-            await sut.writeFile(existingFile, faker.random.words());
+            await sut.writeFile(existingFile, faker.word.words());
             // Act
             const result1 = await sut.folderExists(existingFolder);
             const result2 = await sut.folderExists(existingFile);
@@ -54,9 +54,9 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sut = create(),
-                shouldExist = faker.random.alphaNumeric(15),
-                shouldNotExist = faker.random.alphaNumeric(15),
-                fileContents = faker.random.words();
+                shouldExist = faker.string.alphanumeric(15),
+                shouldNotExist = faker.string.alphanumeric(15),
+                fileContents = faker.word.words();
             await sut.writeFile(shouldExist, fileContents);
             // Act
             const stat1 = await sut.stat(shouldExist);

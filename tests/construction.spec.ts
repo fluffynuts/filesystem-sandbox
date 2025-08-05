@@ -25,7 +25,7 @@ describe(`filesystem-sandbox`, () => {
         describe(`when given at`, () => {
             it(`should create a sandbox dir under the given folder`, async () => {
                 // Arrange
-                const customBase = path.join(__dirname, faker.random.alphaNumeric(10));
+                const customBase = path.join(__dirname, faker.string.alphanumeric(10));
                 // Act
                 const sut = create(customBase);
                 // Assert
