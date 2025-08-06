@@ -10,7 +10,9 @@
     "index.d.ts"
   ],
   "scripts": {
+    "pretest": "rimraf .jest-cache",
     "test": "jest",
+    "posttest": "rimraf .jest-cache",
     "prebuild": "run-p clean-dist generate-index",
     "clean-dist": "rimraf dist",
     "generate-index": "node generate-index.js",
