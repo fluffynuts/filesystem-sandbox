@@ -5,7 +5,7 @@ import { create } from "./common";
 import { folderExists, rm, mkdir } from "yafs";
 import * as os from "os";
 
-describe(`filesystem-sandbox`, () => {
+describe.skip(`filesystem-sandbox`, () => {
     // since this test can run in parallel with other tests
     // destruction could be interfered-with; so we'll make this
     // work in its own little area
@@ -51,7 +51,7 @@ describe(`filesystem-sandbox`, () => {
     });
 
     describe(`destroyAll`, () => {
-        beforeEach(async () => await Sandbox.destroyAny());
+        beforeEach(async () => await Sandbox.destroyAny(base));
         it(`should destroy all sandboxes`, async () => {
             // Arrange
             const

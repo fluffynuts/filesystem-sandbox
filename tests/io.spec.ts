@@ -3,7 +3,7 @@ import * as path from "path";
 import { Sandbox } from "../src";
 import { fakerEN as faker } from "@faker-js/faker";
 import { create } from "./common";
-import { readTextFile, writeTextFile, stat } from "yafs";
+import { readTextFile, writeTextFile, stat, fileExists, folderExists, folderName } from "yafs";
 import { sleep } from "expect-even-more-jest";
 
 describe(`filesystem-sandbox`, () => {
@@ -214,7 +214,7 @@ describe(`filesystem-sandbox`, () => {
             // Arrange
             const
                 sandbox = await Sandbox.create(),
-                fileName = faker.system.fileName(),
+                fileName = faker.string.alphanumeric(),
                 fullPath = sandbox.fullPathFor(fileName);
             expect(fullPath)
                 .not.toBeFile();
@@ -232,22 +232,26 @@ describe(`filesystem-sandbox`, () => {
             const
                 sandbox = await Sandbox.create(),
                 expected = faker.word.words(),
-                fileName = faker.system.fileName(),
+                fileName = faker.string.alphanumeric(),
                 fullPath = await sandbox.writeFile(fileName, expected),
                 st1 = await stat(fullPath);
             expect(st1)
                 .toExist();
             // Act
+            await sleep(1000);
             await sandbox.touch(fileName);
             // Assert
             expect(fullPath)
                 .toHaveContents(expected);
+            await sleep(1000);
             const st2 = await stat(fullPath);
+            if (!st2) {
+                console.error(`could not stat: ${fullPath}`)
+            }
             expect(st2)
                 .toExist();
             expect(st2!.mtimeMs)
                 .toBeGreaterThan(st1!.mtimeMs);
-            await sleep(1000);
             expect(st2!.mtimeMs)
                 .toBeLessThan(Date.now());
         });
@@ -263,5 +267,7 @@ describe(`filesystem-sandbox`, () => {
             return result;
         }
     });
-
+    afterAll(async () => {
+        await Sandbox.destroyAll();
+    });
 });

@@ -301,12 +301,13 @@ export class Sandbox {
     }
 
     /**
-     * Destroys the default base folder for sandboxes -- useful as a once-off
-     * run before all tests to ensure that there are no lingering sandboxes
-     * - cannot destroy sandboxes in custom paths
+     * Destroys the default base folder for sandboxes (or all at the provided
+     * path 'at') -- useful as a once-off run before all tests to ensure
+     * that there are no lingering sandboxes
      */
-    public static async destroyAny() {
-        const target = path.join(baseTarget, basePrefix);
+    public static async destroyAny(at?: string) {
+        const base = at ?? baseTarget;
+        const target = path.join(base, basePrefix);
         try {
             await rm(target);
         } catch (e: any) {
